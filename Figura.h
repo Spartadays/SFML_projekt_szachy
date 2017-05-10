@@ -25,6 +25,8 @@ public:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 	virtual void setPosition(const sf::Vector2f& _pozycja);
 	void wczytajSprite();
+	bool czyWSrodku(const sf::Vector2f& _pozycja);
+	bool wybor;
 private:
 	sf::Sprite sprite;
 	sf::Texture texture;

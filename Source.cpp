@@ -60,6 +60,31 @@ void obslugaKlawiaturyIMyszy()
 		default:
 			break;
 		}
+		if (event.mouseButton.button == sf::Mouse::Left)
+		{
+			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+			for (auto itr = figury.begin(); itr != figury.end(); itr++)
+			{
+				if ((*itr).czyWSrodku(pos_myszki))
+				{
+					std::cout << "XX" << std::endl;
+					(*itr).wybor = true;
+				}
+				else
+					(*itr).wybor = false;
+			}
+		}
+		if (event.type == sf::Event::MouseMoved)
+		{
+			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+			for (auto itr = figury.begin(); itr != figury.end(); itr++)
+			{
+				if ((*itr).wybor == true)
+				{
+					(*itr).setPosition(pos_myszki);
+				}
+			}
+		}
 	}
 }
 
@@ -72,6 +97,7 @@ void rysowanie()
 		for (int j = 0; j < 8; j++)
 		{
 			window.draw(pola[i][j]);
+			pola[i][j].rotate(1);
 		}
 	}
 	for (auto itr = figury.begin(); itr != figury.end(); itr++)

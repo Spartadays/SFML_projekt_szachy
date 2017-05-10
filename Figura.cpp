@@ -4,6 +4,8 @@ Figura::Figura()
 {
 	texture.loadFromFile("x.png");
 	sprite.setTexture(texture);
+	stan = true;
+	wybor = false;
 }
 void Figura::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
@@ -65,4 +67,13 @@ void Figura::setPosition(const sf::Vector2f& _pozycja)
 void Figura::wczytajSprite()
 {
 	sprite.setTexture(texture);
+}
+bool Figura::czyWSrodku(const sf::Vector2f& _pozycja)
+{
+	if (pozycja.x - 50 <= _pozycja.x && pozycja.x + 50 >= _pozycja.x && pozycja.y - 50 <= _pozycja.y && pozycja.y + 50 >= _pozycja.y)
+	{
+		return true;
+	}
+	else
+		return false;
 }
