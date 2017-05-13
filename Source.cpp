@@ -21,8 +21,9 @@ enum Kolor{
 
 struct Siatka
 {
-	bool zajete;
+	bool zajete = false;
 	Kolor kolor;
+	RodzajFigury figura;
 };
 
 /*OBIEKTY DO GRY:*/
@@ -67,6 +68,7 @@ void obslugaKlawiaturyIMyszy()
 				{
 					std::cout << "XX" << std::endl;
 					(*itr).wybor = true;
+					mapa[(*itr).x][(*itr).y].zajete = false;
 				}
 				else
 					(*itr).wybor = false;
@@ -94,14 +96,16 @@ void obslugaKlawiaturyIMyszy()
 					{
 						for (int j = 0; j < 8; j++)
 						{
-							if ((*itr).czyWSrodku(pola.getPosition(i, j)))
+							if ((*itr).czyWSrodku(pola.getPosition(i, j)) && !mapa[i][j].zajete)
 							{
 								(*itr).setPosition(pola.getPosition(i, j));
+								(*itr).wybor = false;
+								(*itr).x = i;
+								(*itr).y = j;
+								mapa[i][j].zajete = true;
 							}
 						}
 					}
-
-					(*itr).wybor = false;
 				}
 			}
 		}
@@ -126,12 +130,17 @@ void tworzenieFigur()
 	for (int i = 0; i < 8; i++)
 	{
 		Figura bialy_pion(b_pionek, pola.getPosition(i, 1));
+		bialy_pion.x = i;
+		bialy_pion.y = 1;
 		figury.push_back(bialy_pion);
 		mapa[i][1].kolor = bialy;
 		mapa[i][1].zajete = true;
 
 		Figura czarny_pion(c_pionek, pola.getPosition(i, 6));
+		czarny_pion.x = i;
+		czarny_pion.y = 6;
 		figury.push_back(czarny_pion);
+
 		mapa[i][6].kolor = czarny;
 		mapa[i][6].zajete = true;
 	}
@@ -139,7 +148,11 @@ void tworzenieFigur()
 	for (int i = 0; i < 2; i++)
 	{
 		Figura biala_wieza(b_wieza, pola.getPosition(0 + i * 7, 0));
+		biala_wieza.x = 0 + i * 7;
+		biala_wieza.y = 0;
 		Figura czarna_wieza(c_wieza, pola.getPosition(0 + i * 7, 7));
+		czarna_wieza.x = 0 + i * 7;
+		czarna_wieza.y = 7;
 		figury.push_back(biala_wieza);
 		mapa[0 + i * 7][0].kolor = bialy;
 		mapa[0 + i * 7][0].zajete = true;
@@ -148,7 +161,11 @@ void tworzenieFigur()
 		mapa[0 + i * 7][7].zajete = true;
 
 		Figura bialy_skoczek(b_skoczek, pola.getPosition(1 + i * 5, 0));
+		bialy_skoczek.x = 1 + i * 5;
+		bialy_skoczek.y = 0;
 		Figura czarny_skoczek(c_skoczek, pola.getPosition(1 + i * 5, 7));
+		czarny_skoczek.x = 1 + i * 5;
+		czarny_skoczek.y = 7;
 		figury.push_back(bialy_skoczek);
 		mapa[1 + i * 5][0].kolor = bialy;
 		mapa[1 + i * 5][0].zajete = true;
@@ -157,7 +174,11 @@ void tworzenieFigur()
 		mapa[1 + i * 5][7].zajete = true;
 
 		Figura bialy_goniec(b_goniec, pola.getPosition(2 + i * 3, 0));
+		bialy_goniec.x = 2 + i * 3;
+		bialy_goniec.y = 0;
 		Figura czarny_goniec(c_goniec, pola.getPosition(2 + i * 3, 7));
+		czarny_goniec.x = 2 + i * 3;
+		czarny_goniec.y = 7;
 		figury.push_back(bialy_goniec);
 		mapa[2 + i * 3][0].kolor = bialy;
 		mapa[2 + i * 3][0].zajete = true;
@@ -167,19 +188,27 @@ void tworzenieFigur()
 	}
 
 	Figura czarny_hetman(c_hetman, pola.getPosition(4, 7));
+	czarny_hetman.x = 4;
+	czarny_hetman.y = 7;
 	figury.push_back(czarny_hetman);
 	mapa[4][7].kolor = czarny;
 	mapa[4][7].zajete = true;
 	Figura czarny_krol(c_krol, pola.getPosition(3, 7));
+	czarny_krol.x = 3;
+	czarny_krol.y = 7;
 	figury.push_back(czarny_krol);
 	mapa[3][7].kolor = czarny;
 	mapa[3][7].zajete = true;
 
 	Figura bialy_hetman(b_hetman, pola.getPosition(4, 0));
+	bialy_hetman.x = 4;
+	bialy_hetman.y = 0;
 	figury.push_back(bialy_hetman);
 	mapa[4][0].kolor = bialy;
 	mapa[4][0].zajete = true;
 	Figura bialy_krol(b_krol, pola.getPosition(3, 0));
+	bialy_krol.x = 3;
+	bialy_krol.y = 0;
 	figury.push_back(bialy_krol);
 	mapa[3][0].kolor = bialy;
 	mapa[3][0].zajete = true;

@@ -27,6 +27,8 @@ public:
 	void wczytajSprite();
 	bool czyWSrodku(const sf::Vector2f& _pozycja);
 	bool wybor;
+	int x;
+	int y;
 private:
 	sf::Sprite sprite;
 	sf::Texture texture;
