@@ -2,20 +2,22 @@
 
 Figura::Figura()
 {
-	texture.loadFromFile("x.png");
-	sprite.setTexture(texture);
 	stan = true;
 	wybor = false;
 }
+
 void Figura::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	//rysowanie obiektow, które sk³adaj¹ siê na narysowanie naszej postaci
 	target.draw(sprite);
 }
+
 Figura::Figura(const RodzajFigury& _rodzaj, const sf::Vector2f& _pozycja)
 {
 	rodzaj = _rodzaj;
 	pozycja = _pozycja;
+	stan = true;
+	wybor = false;
 	switch (_rodzaj)
 	{
 	case b_pionek:
@@ -59,15 +61,18 @@ Figura::Figura(const RodzajFigury& _rodzaj, const sf::Vector2f& _pozycja)
 	sprite.setOrigin(30, 30);
 	sprite.setPosition(pozycja);
 }
+
 void Figura::setPosition(const sf::Vector2f& _pozycja)
 {
 	sprite.setPosition(_pozycja);
 	pozycja = _pozycja;
 }
+
 void Figura::wczytajSprite()
 {
 	sprite.setTexture(texture);
 }
+
 bool Figura::czyWSrodku(const sf::Vector2f& _pozycja)
 {
 	if (pozycja.x - 50 <= _pozycja.x && pozycja.x + 50 >= _pozycja.x && pozycja.y - 50 <= _pozycja.y && pozycja.y + 50 >= _pozycja.y)
