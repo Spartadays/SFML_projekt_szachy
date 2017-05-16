@@ -1,65 +1,70 @@
 #include "Figura.h"
+#include <iostream>
 
-Figura::Figura()
+Figura::Figura(const RodzajFigury& _rodzaj, const Kolor& _kolor, const sf::Vector2f& _pozycja)
 {
+	rodzaj = _rodzaj;
+	pozycja = _pozycja;
+	kolor = _kolor;
 	stan = true;
 	wybor = false;
+	if (_kolor == bialy)
+	{
+		switch (_rodzaj)
+		{
+		case pionek:
+			texture.loadFromFile("b_pionek.png");
+			break;
+		case wieza:
+			texture.loadFromFile("b_wieza.png");
+			break;
+		case skoczek:
+			texture.loadFromFile("b_skoczek.png");
+			break;
+		case goniec:
+			texture.loadFromFile("b_goniec.png");
+			break;
+		case hetman:
+			texture.loadFromFile("b_hetman.png");
+			break;
+		case krol:
+			texture.loadFromFile("b_krol.png");
+			break;
+		}
+	}
+	else if (_kolor == czarny)
+	{
+		switch (_rodzaj)
+		{
+		case pionek:
+			texture.loadFromFile("c_pionek.png");
+			break;
+		case wieza:
+			texture.loadFromFile("c_wieza.png");
+			break;
+		case skoczek:
+			texture.loadFromFile("c_skoczek.png");
+			break;
+		case goniec:
+			texture.loadFromFile("c_goniec.png");
+			break;
+		case hetman:
+			texture.loadFromFile("c_hetman.png");
+			break;
+		case krol:
+			texture.loadFromFile("c_krol.png");
+			break;
+		}
+	}
+	sprite.setTexture(texture);
+	sprite.setOrigin(30, 30);
+	sprite.setPosition(pozycja);
 }
 
 void Figura::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	//rysowanie obiektow, które sk³adaj¹ siê na narysowanie naszej postaci
-	target.draw(sprite);
-}
-
-Figura::Figura(const RodzajFigury& _rodzaj, const sf::Vector2f& _pozycja)
-{
-	rodzaj = _rodzaj;
-	pozycja = _pozycja;
-	stan = true;
-	wybor = false;
-	switch (_rodzaj)
-	{
-	case b_pionek:
-		texture.loadFromFile("b_pionek.png");
-		break;
-	case b_wieza:
-		texture.loadFromFile("b_wieza.png");
-		break;
-	case b_skoczek:
-		texture.loadFromFile("b_skoczek.png");
-		break;
-	case b_goniec:
-		texture.loadFromFile("b_goniec.png");
-		break;
-	case b_hetman:
-		texture.loadFromFile("b_hetman.png");
-		break;
-	case b_krol:
-		texture.loadFromFile("b_krol.png");
-		break;
-	case c_pionek:
-		texture.loadFromFile("c_pionek.png");
-		break;
-	case c_wieza:
-		texture.loadFromFile("c_wieza.png");
-		break;
-	case c_skoczek:
-		texture.loadFromFile("c_skoczek.png");
-		break;
-	case c_goniec:
-		texture.loadFromFile("c_goniec.png");
-		break;
-	case c_hetman:
-		texture.loadFromFile("c_hetman.png");
-		break;
-	case c_krol:
-		texture.loadFromFile("c_krol.png");
-		break;
-	}
-	sprite.setTexture(texture);
-	sprite.setOrigin(30, 30);
-	sprite.setPosition(pozycja);
+	if (stan) target.draw(sprite);
 }
 
 void Figura::setPosition(const sf::Vector2f& _pozycja)
@@ -81,4 +86,18 @@ bool Figura::czyWSrodku(const sf::Vector2f& _pozycja)
 	}
 	else
 		return false;
+}
+
+void Figura::zbij()
+{
+	stan = false;
+	wybor = false;
+	x = 1500;
+	y = 1500;
+	this->setPosition(sf::Vector2f(1500, 1500));
+}
+
+bool Figura::logika(int _x, int _y)
+{
+	return true;
 }
