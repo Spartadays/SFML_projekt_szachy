@@ -26,7 +26,7 @@ public:
 	bool czyWSrodku(const sf::Vector2f& _pozycja);
 
 	void zbij();
-	bool logika(int _x, int _y); // _y i _x to nowe pozycje do sprawdzenia
+	bool logika(int _x, int _y, bool zajete); // _y i _x to nowe pozycje do sprawdzenia
 
 	bool wybor;
 	bool stan;
@@ -34,9 +34,9 @@ public:
 	int y; //pozycja na planszy
 	RodzajFigury rodzaj;
 	Kolor kolor;
+	int licznik_poruszania;
 private:
 	sf::Sprite sprite;
 	sf::Texture texture;
 	sf::Vector2f pozycja;
-	int licznik_poruszania;
 };

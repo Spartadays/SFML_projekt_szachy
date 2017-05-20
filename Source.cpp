@@ -45,6 +45,7 @@ void obslugaKlawiaturyIMyszy()
 		{
 			window.close();
 		}
+		//PODNOSZENIE
 		if (event.mouseButton.button == sf::Mouse::Left && podniesiona == false)
 		{
 			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
@@ -60,6 +61,7 @@ void obslugaKlawiaturyIMyszy()
 					(*itr).wybor = false;
 			}
 		}
+		//PRZESUWANIE
 		if (event.type == sf::Event::MouseMoved && podniesiona == true)
 		{
 			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
@@ -71,6 +73,7 @@ void obslugaKlawiaturyIMyszy()
 				}
 			}
 		}
+		//USTAWIANIE
 		if (event.mouseButton.button == sf::Mouse::Right && podniesiona == true)
 		{
 			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
@@ -82,9 +85,10 @@ void obslugaKlawiaturyIMyszy()
 					{
 						for (int j = 0; j < 8; j++)
 						{
-							if ((*itr).czyWSrodku(pola[i][j].getPosition()) && !mapa[i][j].zajete)
+							if ((*itr).czyWSrodku(pola[i][j].getPosition()) && !mapa[i][j].zajete && (*itr).logika(i, j, mapa[i][j].zajete))
 							{
 								(*itr).setPosition(pola[i][j].getPosition());
+								(*itr).licznik_poruszania++;
 								(*itr).wybor = false;
 								(*itr).x = i;
 								(*itr).y = j;
@@ -93,7 +97,7 @@ void obslugaKlawiaturyIMyszy()
 								mapa[i][j].rodzaj_figury = (*itr).rodzaj;
 								podniesiona = false;
 							}
-							else if ((*itr).czyWSrodku(pola[i][j].getPosition()) && mapa[i][j].zajete && (mapa[i][j].kolor != (*itr).kolor))
+							else if ((*itr).czyWSrodku(pola[i][j].getPosition()) && mapa[i][j].zajete && (*itr).logika(i, j, mapa[i][j].zajete) && (mapa[i][j].kolor != (*itr).kolor))
 							{
 								for (auto itr2 = figury.begin(); itr2 != figury.end(); itr2++)
 								{
@@ -108,6 +112,7 @@ void obslugaKlawiaturyIMyszy()
 										mapa[i][j].kolor = (*itr).kolor;
 										podniesiona = false;
 										(*itr).setPosition(pola[i][j].getPosition());
+										(*itr).licznik_poruszania++;
 									}
 								}
 							}
