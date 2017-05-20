@@ -8,6 +8,7 @@ Figura::Figura(const RodzajFigury& _rodzaj, const Kolor& _kolor, const sf::Vecto
 	kolor = _kolor;
 	stan = true;
 	wybor = false;
+	licznik_poruszania = 0;
 	if (_kolor == bialy)
 	{
 		switch (_rodzaj)
@@ -71,6 +72,7 @@ void Figura::setPosition(const sf::Vector2f& _pozycja)
 {
 	sprite.setPosition(_pozycja);
 	pozycja = _pozycja;
+	licznik_poruszania++;
 }
 
 void Figura::wczytajSprite()

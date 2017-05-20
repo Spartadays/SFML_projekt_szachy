@@ -18,7 +18,6 @@ struct Siatka
 	bool zajete = false;
 	Kolor kolor;
 	RodzajFigury rodzaj_figury;
-	//std::vector<Figura>::iterator f; //!!!!!!!!!!!!!!!!!!!!!!!!!!!
 };
 
 /*_______________*/
@@ -159,7 +158,6 @@ void rysowanie()
 	window.display();					// koniec tej klatki
 }
 
-//Rodzaj kolor itd tylko dla pionkow
 void tworzenieFigur()
 {
 	for (int i = 0; i < 8; i++)
