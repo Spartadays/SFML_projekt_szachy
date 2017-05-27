@@ -35,6 +35,143 @@ void ustawieniaOkna()
 	window.setFramerateLimit(60); // argument: iloœæ fps (nigdy nie u¿ywaj obu na raz)
 }
 
+bool logik(int _x, int _y, Figura fig)
+{
+	switch (fig.rodzaj)
+	{
+	case pionek:
+	{
+		int pomocnicza = 1;
+		if (fig.kolor == czarny) pomocnicza = -1;
+		if ((_y == fig.y - 1 * pomocnicza || (_y == fig.y - 2 * pomocnicza && fig.licznik_poruszania == 0)) && (_x == fig.x) && (!mapa[_x][_y].zajete))
+		{
+			return true;
+		}
+		else if (mapa[_x][_y].zajete && (_x == fig.x + 1 || _x == fig.x - 1) && _y == fig.y - 1 * pomocnicza)
+		{
+			return true;
+		}
+		else if (_x == fig.x && _y == fig.y)
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+	case skoczek:
+	{
+		if ((_x == fig.x + 1) && (_y == fig.y + 2 || _y == fig.y - 2))
+		{
+			return true;
+		}
+		else if ((_x == fig.x - 1) && (_y == fig.y + 2 || _y == fig.y - 2))
+		{
+			return true;
+		}
+		else if ((_y == fig.y + 1) && (_x == fig.x + 2 || _x == fig.x - 2))
+		{
+			return true;
+		}
+		else if ((_y == fig.y - 1) && (_x == fig.x + 2 || _x == fig.x - 2))
+		{
+			return true;
+		}
+		else if (_x == fig.x && _y == fig.y)
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+	case goniec:
+	{
+		for (int i = 1; i < 9; i++)
+		{
+			if (_x == fig.x + i && _y == fig.y + i)
+			{
+				for (int k = 1; k < _x - fig.x; k++)
+				{
+					if (mapa[_x - k][_y - k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x + i && _y == fig.y - i)
+			{
+				for (int k = 1; k < _x - fig.x; k++)
+				{
+					if (mapa[_x - k][_y + k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x - i && _y == fig.y - i)
+			{
+				for (int k = 1; k < fig.x - _x; k++)
+				{
+					if (mapa[_x + k][_y + k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x - i && _y == fig.y + i)
+			{
+				for (int k = 1; k < fig.x - _x; k++)
+				{
+					if (mapa[_x + k][_y - k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	case wieza:
+	{
+		if (1)
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+	case hetman:
+	{
+		if (1)
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+	case krol:
+	{
+		if ((_x == fig.x + 1 || _x == fig.x - 1 || _x == fig.x) && (_y == fig.y + 1 || _y == fig.y - 1 || _y == fig.y) && (!mapa[_x][_y].zajete))
+		{
+			return true;
+		}
+		else if (mapa[_x][_y].zajete && (_x == fig.x + 1 || _x == fig.x - 1 || _x == fig.x) && (_y == fig.y + 1 || _y == fig.y - 1 || _y == fig.y))
+		{
+			return true;
+		}
+		else
+			return false;
+	}
+	}
+}
+
 void obslugaKlawiaturyIMyszy()
 {
 	sf::Event event;
@@ -61,6 +198,7 @@ void obslugaKlawiaturyIMyszy()
 					(*itr).wybor = false;
 			}
 		}
+		//event.MouseButtonPressed == sf::Mouse::Left;
 		//PRZESUWANIE
 		if (event.type == sf::Event::MouseMoved && podniesiona == true)
 		{
@@ -85,7 +223,7 @@ void obslugaKlawiaturyIMyszy()
 					{
 						for (int j = 0; j < 8; j++)
 						{
-							if ((*itr).czyWSrodku(pola[i][j].getPosition()) && !mapa[i][j].zajete && (*itr).logika(i, j, mapa[i][j].zajete))
+							if ((*itr).czyWSrodku(pola[i][j].getPosition()) && !mapa[i][j].zajete && logik(i, j, (*itr)))
 							{
 								(*itr).setPosition(pola[i][j].getPosition());
 								(*itr).licznik_poruszania++;
@@ -97,7 +235,7 @@ void obslugaKlawiaturyIMyszy()
 								mapa[i][j].rodzaj_figury = (*itr).rodzaj;
 								podniesiona = false;
 							}
-							else if ((*itr).czyWSrodku(pola[i][j].getPosition()) && mapa[i][j].zajete && (*itr).logika(i, j, mapa[i][j].zajete) && (mapa[i][j].kolor != (*itr).kolor))
+							else if ((*itr).czyWSrodku(pola[i][j].getPosition()) && mapa[i][j].zajete && logik(i, j, (*itr)) && (mapa[i][j].kolor != (*itr).kolor))
 							{
 								for (auto itr2 = figury.begin(); itr2 != figury.end(); itr2++)
 								{
@@ -132,7 +270,7 @@ void tekst()
 	text.setFont(font);
 
 	// ustawienie stringa który ma byæ wyœwietlony
-	text.setString("Test tekstu");
+	text.setString("txt");
 
 	// ustawienie wielkoœci czcionki
 	text.setCharacterSize(70); // w pikselach, nie punktach!
