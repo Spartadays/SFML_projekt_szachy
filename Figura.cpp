@@ -97,27 +97,3 @@ void Figura::zbij()
 	y = 1500;
 	this->setPosition(sf::Vector2f(1500, 1500));
 }
-
-bool Figura::logika(int _x, int _y, bool zajete)
-{
-	switch (rodzaj)
-	{
-	case pionek:
-	{
-		int pomocnicza = 1;
-		if (kolor == czarny) pomocnicza = -1;
-		if ((_y == y - 1 * pomocnicza || (_y == y - 2 * pomocnicza && licznik_poruszania == 0)) && (_x == x) && (!zajete))
-		{
-			return true;
-		}
-		else if (zajete && (_x == x + 1 || _x == x - 1) && _y == y - 1 * pomocnicza)
-		{
-			return true;
-		}
-		else
-			return false;
-	}
-	default:
-		return true;
-	}
-}

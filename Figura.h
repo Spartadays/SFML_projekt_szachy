@@ -26,7 +26,6 @@ public:
 	bool czyWSrodku(const sf::Vector2f& _pozycja);
 
 	void zbij();
-	bool logika(int _x, int _y, bool zajete); // _y i _x to nowe pozycje do sprawdzenia
 
 	bool wybor;
 	bool stan;
