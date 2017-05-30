@@ -140,12 +140,58 @@ bool logik(int _x, int _y, Figura fig)
 	}
 	case wieza:
 	{
-		if (1)
+		for (int i = 1; i < 9; i++)
 		{
-			return true;
+			if (_x == fig.x + i && _y == fig.y)
+			{
+				for (int k = 1; k < _x - fig.x; k++)
+				{
+					if (mapa[_x - k][_y].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x - i && _y == fig.y)
+			{
+				for (int k = 1; k < fig.x - _x; k++)
+				{
+					if (mapa[_x + k][_y].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y + i)
+			{
+				for (int k = 1; k < _y - fig.y; k++)
+				{
+					if (mapa[_x][_y - k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y - i)
+			{
+				for (int k = 1; k < fig.y - _y; k++)
+				{
+					if (mapa[_x][_y + k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y)
+			{
+				return true;
+			}
 		}
-		else
-			return false;
+		return false;
 	}
 	case hetman:
 	{
@@ -182,7 +228,7 @@ void obslugaKlawiaturyIMyszy()
 		{
 			window.close();
 		}
-		//PODNOSZENIE
+		//PODNOSZENIE //tura dla koloru i wtedy podniesc
 		if (event.mouseButton.button == sf::Mouse::Left && podniesiona == false)
 		{
 			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
@@ -270,7 +316,7 @@ void tekst()
 	text.setFont(font);
 
 	// ustawienie stringa który ma byæ wyœwietlony
-	text.setString("txt");
+	text.setString("LPM - podnies \n PPM - upusc");
 
 	// ustawienie wielkoœci czcionki
 	text.setCharacterSize(70); // w pikselach, nie punktach!
