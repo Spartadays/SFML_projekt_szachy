@@ -26,6 +26,7 @@ std::vector <std::vector<sf::RectangleShape>>pola;
 std::vector <std::vector<Siatka>>mapa;
 bool podniesiona = false;
 sf::Font font;
+Kolor tura = bialy;
 
 /*_______________*/
 
@@ -53,7 +54,8 @@ bool logik(int _x, int _y, Figura fig)
 		}
 		else if (_x == fig.x && _y == fig.y)
 		{
-			return true;
+			//return true;
+			return false;
 		}
 		else
 			return false;
@@ -78,7 +80,8 @@ bool logik(int _x, int _y, Figura fig)
 		}
 		else if (_x == fig.x && _y == fig.y)
 		{
-			return true;
+			//return true;
+			return false;
 		}
 		else
 			return false;
@@ -133,7 +136,8 @@ bool logik(int _x, int _y, Figura fig)
 			}
 			else if (_x == fig.x && _y == fig.y)
 			{
-				return true;
+				//return true;
+				return false;
 			}
 		}
 		return false;
@@ -188,28 +192,171 @@ bool logik(int _x, int _y, Figura fig)
 			}
 			else if (_x == fig.x && _y == fig.y)
 			{
-				return true;
+				//return true;
+				return false;
 			}
 		}
 		return false;
 	}
 	case hetman:
 	{
-		if (1)
+		for (int i = 1; i < 9; i++)
 		{
-			return true;
+			if (_x == fig.x + i && _y == fig.y)
+			{
+				for (int k = 1; k < _x - fig.x; k++)
+				{
+					if (mapa[_x - k][_y].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x - i && _y == fig.y)
+			{
+				for (int k = 1; k < fig.x - _x; k++)
+				{
+					if (mapa[_x + k][_y].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y + i)
+			{
+				for (int k = 1; k < _y - fig.y; k++)
+				{
+					if (mapa[_x][_y - k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y - i)
+			{
+				for (int k = 1; k < fig.y - _y; k++)
+				{
+					if (mapa[_x][_y + k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y)
+			{
+				//return true;
+				return false;
+			}
 		}
-		else
-			return false;
+		for (int i = 1; i < 9; i++)
+		{
+			if (_x == fig.x + i && _y == fig.y + i)
+			{
+				for (int k = 1; k < _x - fig.x; k++)
+				{
+					if (mapa[_x - k][_y - k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x + i && _y == fig.y - i)
+			{
+				for (int k = 1; k < _x - fig.x; k++)
+				{
+					if (mapa[_x - k][_y + k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x - i && _y == fig.y - i)
+			{
+				for (int k = 1; k < fig.x - _x; k++)
+				{
+					if (mapa[_x + k][_y + k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x - i && _y == fig.y + i)
+			{
+				for (int k = 1; k < fig.x - _x; k++)
+				{
+					if (mapa[_x + k][_y - k].zajete)
+					{
+						return false;
+					}
+				}
+				return true;
+			}
+			else if (_x == fig.x && _y == fig.y)
+			{
+				//return true;
+				return false;
+			}
+		}
+		return false;
 	}
 	case krol:
 	{
-		if ((_x == fig.x + 1 || _x == fig.x - 1 || _x == fig.x) && (_y == fig.y + 1 || _y == fig.y - 1 || _y == fig.y) && (!mapa[_x][_y].zajete))
+		if (_x == fig.x && _y == fig.y) return false;
+		else if ((_x == fig.x + 1 || _x == fig.x - 1 || _x == fig.x) && (_y == fig.y + 1 || _y == fig.y - 1 || _y == fig.y) && (!mapa[_x][_y].zajete))
 		{
 			return true;
 		}
 		else if (mapa[_x][_y].zajete && (_x == fig.x + 1 || _x == fig.x - 1 || _x == fig.x) && (_y == fig.y + 1 || _y == fig.y - 1 || _y == fig.y))
 		{
+			return true;
+		}
+		else if (fig.licznik_poruszania == 0 && _x == 6 && _y == fig.y &&  mapa[7][_y].rodzaj_figury == wieza && !mapa[6][_y].zajete && !mapa[5][_y].zajete)
+		{
+			for (auto itr3 = figury.begin(); itr3 != figury.end(); itr3++)
+			{
+				if ((*itr3).kolor == fig.kolor && (*itr3).rodzaj == wieza && (*itr3).licznik_poruszania == 0 && (*itr3).x == 7 && (*itr3).y == _y)
+				{
+					std::cout << "Roszada w prawo";
+					mapa[(*itr3).x][(*itr3).y].zajete = false;
+					mapa[(*itr3).x][(*itr3).y].rodzaj_figury = nic;
+					mapa[5][_y].zajete = true;
+					mapa[5][_y].kolor = (*itr3).kolor;
+					mapa[5][_y].rodzaj_figury == wieza;
+					(*itr3).x = 5;
+					(*itr3).licznik_poruszania++;
+					(*itr3).setPosition(pola[5][_y].getPosition());
+					podniesiona == false;
+					fig.wybor == false;
+				}
+			}
+			return true;
+		}
+		else if (fig.licznik_poruszania == 0 && _x == 2 && _y == fig.y && !mapa[1][_y].zajete && !mapa[2][_y].zajete && !mapa[3][_y].zajete && mapa[0][_y].rodzaj_figury == wieza)
+		{
+			for (auto itr3 = figury.begin(); itr3 != figury.end(); itr3++)
+			{
+				if ((*itr3).kolor == fig.kolor && (*itr3).rodzaj == wieza && (*itr3).licznik_poruszania == 0 && (*itr3).x == 0 && (*itr3).y == _y)
+				{
+					std::cout << "Roszada w lewo";
+					mapa[(*itr3).x][(*itr3).y].zajete = false;
+					mapa[(*itr3).x][(*itr3).y].rodzaj_figury = nic;
+					mapa[3][_y].zajete = true;
+					mapa[3][_y].kolor = (*itr3).kolor;
+					mapa[3][_y].rodzaj_figury == wieza;
+					(*itr3).x = 3;
+					(*itr3).licznik_poruszania++;
+					(*itr3).setPosition(pola[3][_y].getPosition());
+					podniesiona == false;
+					fig.wybor == false;
+				}
+			}
 			return true;
 		}
 		else
@@ -228,16 +375,49 @@ void obslugaKlawiaturyIMyszy()
 		{
 			window.close();
 		}
+		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A)
+		{
+			switch (tura)
+			{
+			case bialy:
+				if (mapa[4][7].rodzaj_figury == krol && mapa[0][7].rodzaj_figury == wieza && !mapa[1][7].zajete && !mapa[2][7].zajete && !mapa[3][7].zajete)
+				{
+					std::cout << "Roszada w lewo" << std::endl;
+				}
+			case czarny:
+				if (mapa[4][0].rodzaj_figury == krol && mapa[0][0].rodzaj_figury == wieza && !mapa[1][0].zajete && !mapa[2][0].zajete && !mapa[3][0].zajete)
+				{
+					std::cout << "Roszada w lewo" << std::endl;
+				}
+			}
+		}
+		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
+		{
+			switch (tura)
+			{
+			case bialy:
+				if (mapa[4][7].rodzaj_figury == krol && mapa[7][7].rodzaj_figury == wieza && !mapa[5][7].zajete && !mapa[6][7].zajete)
+				{
+					std::cout << "Roszada w prawo" << std::endl;
+				}
+			case czarny:
+				if (mapa[4][0].rodzaj_figury == krol && mapa[7][0].rodzaj_figury == wieza && !mapa[5][0].zajete && !mapa[6][0].zajete)
+				{
+					std::cout << "Roszada w prawo" << std::endl;
+				}
+			}
+		}
 		//PODNOSZENIE //tura dla koloru i wtedy podniesc
 		if (event.mouseButton.button == sf::Mouse::Left && podniesiona == false)
 		{
 			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
 			for (auto itr = figury.begin(); itr != figury.end(); itr++)
 			{
-				if ((*itr).czyWSrodku(pos_myszki))
+				if ((*itr).czyWSrodku(pos_myszki) && (*itr).kolor == tura)
 				{
 					(*itr).wybor = true;
 					mapa[(*itr).x][(*itr).y].zajete = false;
+					mapa[(*itr).x][(*itr).y].rodzaj_figury = nic;
 					podniesiona = true;
 				}
 				else
@@ -280,6 +460,8 @@ void obslugaKlawiaturyIMyszy()
 								mapa[i][j].kolor = (*itr).kolor;
 								mapa[i][j].rodzaj_figury = (*itr).rodzaj;
 								podniesiona = false;
+								if (tura == bialy) tura = czarny;
+								else tura = bialy;
 							}
 							else if ((*itr).czyWSrodku(pola[i][j].getPosition()) && mapa[i][j].zajete && logik(i, j, (*itr)) && (mapa[i][j].kolor != (*itr).kolor))
 							{
@@ -297,6 +479,8 @@ void obslugaKlawiaturyIMyszy()
 										podniesiona = false;
 										(*itr).setPosition(pola[i][j].getPosition());
 										(*itr).licznik_poruszania++;
+										if (tura == bialy) tura = czarny;
+										else tura = bialy;
 									}
 								}
 							}
@@ -386,13 +570,13 @@ void tworzenieFigur()
 		mapa[0 + i * 7][0].kolor = czarny;
 		mapa[0 + i * 7][0].rodzaj_figury = wieza;
 
-		Figura bialy_skoczek(skoczek, bialy, pola[1 + i * 5][7].getPosition());
+		/*Figura bialy_skoczek(skoczek, bialy, pola[1 + i * 5][7].getPosition());
 		bialy_skoczek.x = 1 + i * 5;
 		bialy_skoczek.y = 7;
 		figury.push_back(bialy_skoczek);
 		mapa[1 + i * 5][7].zajete = true;
 		mapa[1 + i * 5][7].kolor = bialy;
-		mapa[1 + i * 5][7].rodzaj_figury = skoczek;
+		mapa[1 + i * 5][7].rodzaj_figury = skoczek;*/
 
 		Figura czarny_skoczek(skoczek, czarny, pola[1 + i * 5][0].getPosition());
 		czarny_skoczek.x = 1 + i * 5;
@@ -402,13 +586,13 @@ void tworzenieFigur()
 		mapa[1 + i * 5][0].kolor = czarny;
 		mapa[1 + i * 5][0].rodzaj_figury = skoczek;
 
-		Figura bialy_goniec(goniec, bialy, pola[2 + i * 3][7].getPosition());
+		/*Figura bialy_goniec(goniec, bialy, pola[2 + i * 3][7].getPosition());
 		bialy_goniec.x = 2 + i * 3;
 		bialy_goniec.y = 7;
 		figury.push_back(bialy_goniec);
 		mapa[2 + i * 3][7].zajete = true;
 		mapa[2 + i * 3][7].kolor = bialy;
-		mapa[2 + i * 3][7].rodzaj_figury = goniec;
+		mapa[2 + i * 3][7].rodzaj_figury = goniec;*/
 
 		Figura czarny_goniec(goniec, czarny, pola[2 + i * 3][0].getPosition());
 		czarny_goniec.x = 2 + i * 3;

@@ -9,6 +9,7 @@ enum RodzajFigury{
 	goniec,
 	hetman,
 	krol,
+	nic
 };
 
 enum Kolor{
