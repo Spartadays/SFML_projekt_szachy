@@ -27,6 +27,7 @@ public:
 	bool czyWSrodku(const sf::Vector2f& _pozycja);
 
 	void zbij();
+	void naHetmana();
 
 	bool wybor;
 	bool stan;

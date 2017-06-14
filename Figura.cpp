@@ -97,3 +97,11 @@ void Figura::zbij()
 	y = 1500;
 	this->setPosition(sf::Vector2f(1500, 1500));
 }
+
+void Figura::naHetmana()
+{
+	rodzaj = hetman;
+	if (kolor == bialy)texture.loadFromFile("b_hetman.png");
+	else texture.loadFromFile("c_hetman.png");
+	wczytajSprite();
+}

@@ -1,12 +1,14 @@
-#include <SFML/Graphics.hpp>
-#include <iostream>
-#include <vector>
+ï»¿#include <SFML/Graphics.hpp>
+#include "Connector.hpp"
 #include "Figura.h"
+#include <iostream>
 #include <string.h>
+#include <vector>
+#include <time.h>
 
 /*Wymiary okna:*/
-#define wysokosc_okna 1000
 #define szerokosc_okna 1600
+#define wysokosc_okna 1000
 #define rozmiar_pola 110
 /*_____________*/
 
@@ -15,33 +17,58 @@ sf::RenderWindow window(sf::VideoMode(szerokosc_okna, wysokosc_okna), "Szachy", 
 
 struct Siatka
 {
+	RodzajFigury rodzaj_figury;
 	bool zajete = false;
 	Kolor kolor;
-	RodzajFigury rodzaj_figury;
 };
 
-/*_______________*/
+/*Globalne*/
+std::vector <std::vector<sf::RectangleShape>>pola;	//do rysowania planszy
+std::vector <std::vector<Siatka>>mapa;				//do logiki gry
 std::vector <Figura> figury;
-std::vector <std::vector<sf::RectangleShape>>pola;
-std::vector <std::vector<Siatka>>mapa;
-bool podniesiona = false;
-sf::Font font;
-Kolor tura = bialy;
 
-/*_______________*/
+bool podniesiona = false;
+bool komputer = true;								//czy grac z Stockfishem??
+bool start = true;
+
+Kolor tura = bialy;									//poczatkowa tura
+Kolor kolor_komputera = czarny;
+
+std::string nowa_pozycja = "";
+std::string komp_pozycja = "";
+sf::Texture textura_przegrana;
+sf::Texture textura_poczatek;
+sf::Texture textura_zasady;
+sf::Sprite sprite;
+sf::Font font;
+/*_________*/
 
 void ustawieniaOkna()
 {
 	//window.setVerticalSyncEnabled(true); //vsync
-	window.setFramerateLimit(60); // argument: iloœæ fps (nigdy nie u¿ywaj obu na raz)
+	window.setFramerateLimit(60); // argument: iloÅ›Ä‡ fps (nigdy nie uÅ¼ywaj obu na raz)
 }
 
-bool logik(int _x, int _y, Figura fig)
+bool logik(int _x, int _y, Figura &fig)
 {
 	switch (fig.rodzaj)
 	{
 	case pionek:
 	{
+		//Wymiana na hetmana:
+		if (fig.kolor == czarny && _y == 7)
+		{
+			fig.rodzaj = hetman;
+			mapa[_x][_y].rodzaj_figury = hetman;
+			fig.naHetmana();
+		}
+		else if (fig.kolor == bialy && _y == 0)
+		{
+			fig.rodzaj = hetman;
+			mapa[_x][_y].rodzaj_figury = hetman;
+			fig.naHetmana();
+		}
+		//#################
 		int pomocnicza = 1;
 		if (fig.kolor == czarny) pomocnicza = -1;
 		if ((_y == fig.y - 1 * pomocnicza || (_y == fig.y - 2 * pomocnicza && fig.licznik_poruszania == 0)) && (_x == fig.x) && (!mapa[_x][_y].zajete))
@@ -52,6 +79,22 @@ bool logik(int _x, int _y, Figura fig)
 		{
 			return true;
 		}
+		//Bicie w przelocie:
+		else if ((_x == fig.x + 1 || _x == fig.x - 1) && _y == fig.y - 1 * pomocnicza && !mapa[_x][_y].zajete && mapa[_x][_y + pomocnicza].zajete && mapa[_x][_y + pomocnicza].rodzaj_figury == pionek && mapa[_x][_y + pomocnicza].kolor != fig.kolor)
+		{
+			for (auto itr3 = figury.begin(); itr3 != figury.end(); itr3++)
+			{
+				if ((*itr3).kolor != fig.kolor && (*itr3).rodzaj == pionek && (*itr3).licznik_poruszania == 1 && (*itr3).x == _x && (*itr3).y == _y + pomocnicza)
+				{
+					std::cout << "Bicie w przelocie";
+					(*itr3).zbij();
+					mapa[_x][_y + pomocnicza].zajete = false;
+					mapa[_x][_y + pomocnicza].rodzaj_figury = nic;
+				}
+			}
+			return true;
+		}
+		//################
 		else if (_x == fig.x && _y == fig.y)
 		{
 			//return true;
@@ -317,6 +360,7 @@ bool logik(int _x, int _y, Figura fig)
 		{
 			return true;
 		}
+		//Roszady:
 		else if (fig.licznik_poruszania == 0 && _x == 6 && _y == fig.y &&  mapa[7][_y].rodzaj_figury == wieza && !mapa[6][_y].zajete && !mapa[5][_y].zajete)
 		{
 			for (auto itr3 = figury.begin(); itr3 != figury.end(); itr3++)
@@ -359,9 +403,99 @@ bool logik(int _x, int _y, Figura fig)
 			}
 			return true;
 		}
+		//#############
 		else
 			return false;
 	}
+	}
+}
+
+std::string naNotacje(int x, int y)
+{
+	std::string s = "";
+	s += char('a' + x);
+	s += char('8' - y);
+	return s;
+}
+
+void tekst(std::string te)
+{
+	sf::Text text;
+
+	// wybranie czcionki
+	text.setFont(font);
+
+	// ustawienie stringa ktÃ³ry ma byÃ¦ wyÅ“wietlony
+	text.setString(te);
+
+	// ustawienie wielkoÅ“ci czcionki
+	text.setCharacterSize(35); // w pikselach, nie punktach!
+	text.setPosition(1100, 300);
+	// ustawienie stylu tekstu
+	text.setStyle(sf::Text::Bold | sf::Text::Italic);
+
+	// wewnÂ¹trz gÂ³Ã³wnej pÃªtli, pomiÃªdzy window.clear(), a window.display()
+	window.draw(text);
+}
+
+void ruchStockfisha(std::string notacja)
+{
+	std::system("cls");
+
+	std::cout << "Komputer ruszyl sie: " << komp_pozycja << "TWOJ RUCH !!" << std::endl;
+	nowa_pozycja += komp_pozycja + " ";
+	int stare_x = int(notacja[0]) - 97;
+	int stare_y = abs(int(notacja[1]) - 56);
+
+	int nowe_x = int(notacja[2]) - 97;
+	int nowe_y = abs(int(notacja[3]) - 56);
+
+	for (auto itr = figury.begin(); itr != figury.end(); itr++)
+	{
+		if ((*itr).x == stare_x && (*itr).y == stare_y)
+		{
+			(*itr).wybor = true;
+			mapa[(*itr).x][(*itr).y].zajete = false;
+			mapa[(*itr).x][(*itr).y].rodzaj_figury = nic;
+			podniesiona = true;
+			if (!mapa[nowe_x][nowe_y].zajete)
+			{
+				logik(nowe_x, nowe_y, (*itr));
+				(*itr).setPosition(pola[nowe_x][nowe_y].getPosition());
+				(*itr).licznik_poruszania++;
+				(*itr).wybor = false;
+				(*itr).x = nowe_x;
+				(*itr).y = nowe_y;
+				mapa[nowe_x][nowe_y].zajete = true;
+				mapa[nowe_x][nowe_y].kolor = (*itr).kolor;
+				mapa[nowe_x][nowe_y].rodzaj_figury = (*itr).rodzaj;
+				podniesiona = false;
+				if (tura == czarny)tura = bialy;
+				else tura = czarny;
+			}
+			else if (mapa[nowe_x][nowe_y].zajete)
+			{
+				for (auto itr2 = figury.begin(); itr2 != figury.end(); itr2++)
+				{
+					if (itr2 != itr && (*itr2).x == nowe_x && (*itr2).y == nowe_y)
+					{
+						logik(nowe_x, nowe_y, (*itr));
+						(*itr).wybor = false;
+						(*itr).x = nowe_x;
+						(*itr).y = nowe_y;
+						(*itr2).zbij();
+						mapa[nowe_x][nowe_y].zajete = true;
+						mapa[nowe_x][nowe_y].rodzaj_figury = (*itr).rodzaj;
+						mapa[nowe_x][nowe_y].kolor = (*itr).kolor;
+						podniesiona = false;
+						(*itr).setPosition(pola[nowe_x][nowe_y].getPosition());
+						(*itr).licznik_poruszania++;
+						if (tura == czarny)tura = bialy;
+						else tura = czarny;
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -369,118 +503,116 @@ void obslugaKlawiaturyIMyszy()
 {
 	sf::Event event;
 
-	while (window.pollEvent(event))			// dopóki s¹ eventy do obs³u¿enia
+	while (window.pollEvent(event))
 	{
-		if (event.type == sf::Event::Closed)			// zamkniêcie okna
+		if (event.type == sf::Event::Closed)			//zamkniecie okna
 		{
 			window.close();
 		}
-		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::A)
+		if (event.key.code == sf::Keyboard::B && start)
 		{
-			switch (tura)
-			{
-			case bialy:
-				if (mapa[4][7].rodzaj_figury == krol && mapa[0][7].rodzaj_figury == wieza && !mapa[1][7].zajete && !mapa[2][7].zajete && !mapa[3][7].zajete)
-				{
-					std::cout << "Roszada w lewo" << std::endl;
-				}
-			case czarny:
-				if (mapa[4][0].rodzaj_figury == krol && mapa[0][0].rodzaj_figury == wieza && !mapa[1][0].zajete && !mapa[2][0].zajete && !mapa[3][0].zajete)
-				{
-					std::cout << "Roszada w lewo" << std::endl;
-				}
-			}
+			kolor_komputera = czarny;
+			start = false;
 		}
-		if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::D)
-		{
-			switch (tura)
-			{
-			case bialy:
-				if (mapa[4][7].rodzaj_figury == krol && mapa[7][7].rodzaj_figury == wieza && !mapa[5][7].zajete && !mapa[6][7].zajete)
-				{
-					std::cout << "Roszada w prawo" << std::endl;
-				}
-			case czarny:
-				if (mapa[4][0].rodzaj_figury == krol && mapa[7][0].rodzaj_figury == wieza && !mapa[5][0].zajete && !mapa[6][0].zajete)
-				{
-					std::cout << "Roszada w prawo" << std::endl;
-				}
-			}
+		else if (event.key.code == sf::Keyboard::C && start) {
+			kolor_komputera = bialy;
+			start = false;
 		}
-		//PODNOSZENIE //tura dla koloru i wtedy podniesc
-		if (event.mouseButton.button == sf::Mouse::Left && podniesiona == false)
+		if (!start)
 		{
-			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-			for (auto itr = figury.begin(); itr != figury.end(); itr++)
+			//PODNOSZENIE
+			if (tura == kolor_komputera && komputer == true)
 			{
-				if ((*itr).czyWSrodku(pos_myszki) && (*itr).kolor == tura)
-				{
-					(*itr).wybor = true;
-					mapa[(*itr).x][(*itr).y].zajete = false;
-					mapa[(*itr).x][(*itr).y].rodzaj_figury = nic;
-					podniesiona = true;
-				}
-				else
-					(*itr).wybor = false;
+				komp_pozycja = getNextMove(nowa_pozycja);
+				ruchStockfisha(komp_pozycja);
 			}
-		}
-		//event.MouseButtonPressed == sf::Mouse::Left;
-		//PRZESUWANIE
-		if (event.type == sf::Event::MouseMoved && podniesiona == true)
-		{
-			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-			for (auto itr = figury.begin(); itr != figury.end(); itr++)
+			else
 			{
-				if ((*itr).wybor == true)
+				if (event.mouseButton.button == sf::Mouse::Left && podniesiona == false)
 				{
-					(*itr).setPosition(pos_myszki);
-				}
-			}
-		}
-		//USTAWIANIE
-		if (event.mouseButton.button == sf::Mouse::Right && podniesiona == true)
-		{
-			sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
-			for (auto itr = figury.begin(); itr != figury.end(); itr++)
-			{
-				if ((*itr).wybor == true)
-				{
-					for (int i = 0; i < 8; i++)
+					sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+					for (auto itr = figury.begin(); itr != figury.end(); itr++)
 					{
-						for (int j = 0; j < 8; j++)
+						if ((*itr).czyWSrodku(pos_myszki) && (*itr).kolor == tura)
 						{
-							if ((*itr).czyWSrodku(pola[i][j].getPosition()) && !mapa[i][j].zajete && logik(i, j, (*itr)))
+							(*itr).wybor = true;
+							mapa[(*itr).x][(*itr).y].zajete = false;
+							mapa[(*itr).x][(*itr).y].rodzaj_figury = nic;
+							podniesiona = true;
+							nowa_pozycja += naNotacje((*itr).x, (*itr).y);
+						}
+						else
+							(*itr).wybor = false;
+					}
+				}
+				//PRZESUWANIE
+				if (event.type == sf::Event::MouseMoved && podniesiona == true)
+				{
+					sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+					for (auto itr = figury.begin(); itr != figury.end(); itr++)
+					{
+						if ((*itr).wybor == true)
+						{
+							(*itr).setPosition(pos_myszki);
+						}
+					}
+				}
+				//USTAWIANIE
+				if (event.mouseButton.button == sf::Mouse::Right && podniesiona == true)
+				{
+					sf::Vector2f pos_myszki = static_cast<sf::Vector2f>(sf::Mouse::getPosition(window));
+					for (auto itr = figury.begin(); itr != figury.end(); itr++)
+					{
+						if ((*itr).wybor == true)
+						{
+							for (int i = 0; i < 8; i++)
 							{
-								(*itr).setPosition(pola[i][j].getPosition());
-								(*itr).licznik_poruszania++;
-								(*itr).wybor = false;
-								(*itr).x = i;
-								(*itr).y = j;
-								mapa[i][j].zajete = true;
-								mapa[i][j].kolor = (*itr).kolor;
-								mapa[i][j].rodzaj_figury = (*itr).rodzaj;
-								podniesiona = false;
-								if (tura == bialy) tura = czarny;
-								else tura = bialy;
-							}
-							else if ((*itr).czyWSrodku(pola[i][j].getPosition()) && mapa[i][j].zajete && logik(i, j, (*itr)) && (mapa[i][j].kolor != (*itr).kolor))
-							{
-								for (auto itr2 = figury.begin(); itr2 != figury.end(); itr2++)
+								for (int j = 0; j < 8; j++)
 								{
-									if (itr2 != itr && (*itr2).x == i && (*itr2).y == j)
+									if ((*itr).czyWSrodku(pola[i][j].getPosition()) && !mapa[i][j].zajete && logik(i, j, (*itr)))
 									{
+										(*itr).setPosition(pola[i][j].getPosition());
+										(*itr).licznik_poruszania++;
 										(*itr).wybor = false;
 										(*itr).x = i;
 										(*itr).y = j;
-										(*itr2).zbij();
 										mapa[i][j].zajete = true;
-										mapa[i][j].rodzaj_figury = (*itr).rodzaj;
 										mapa[i][j].kolor = (*itr).kolor;
+										mapa[i][j].rodzaj_figury = (*itr).rodzaj;
 										podniesiona = false;
-										(*itr).setPosition(pola[i][j].getPosition());
-										(*itr).licznik_poruszania++;
+										nowa_pozycja += naNotacje((*itr).x, (*itr).y) + " ";
+
 										if (tura == bialy) tura = czarny;
 										else tura = bialy;
+										/*komp_pozycja = getNextMove(nowa_pozycja);
+										if (komp_pozycja == "error") std::cout << "error";
+										std::cout << komp_pozycja << std::endl;*/
+									}
+									else if ((*itr).czyWSrodku(pola[i][j].getPosition()) && mapa[i][j].zajete && logik(i, j, (*itr)) && (mapa[i][j].kolor != (*itr).kolor))
+									{
+										for (auto itr2 = figury.begin(); itr2 != figury.end(); itr2++)
+										{
+											if (itr2 != itr && (*itr2).x == i && (*itr2).y == j)
+											{
+												(*itr).wybor = false;
+												(*itr).x = i;
+												(*itr).y = j;
+												(*itr2).zbij();
+												mapa[i][j].zajete = true;
+												mapa[i][j].rodzaj_figury = (*itr).rodzaj;
+												mapa[i][j].kolor = (*itr).kolor;
+												podniesiona = false;
+												(*itr).setPosition(pola[i][j].getPosition());
+												(*itr).licznik_poruszania++;
+												nowa_pozycja += naNotacje((*itr).x, (*itr).y) + " ";
+
+												if (tura == bialy) tura = czarny;
+												else tura = bialy;
+												/*komp_pozycja = getNextMove(nowa_pozycja);
+												if (komp_pozycja == "error") std::cout << "error";
+												std::cout << komp_pozycja << std::endl;*/
+											}
+										}
 									}
 								}
 							}
@@ -492,29 +624,9 @@ void obslugaKlawiaturyIMyszy()
 	}
 }
 
-void tekst()
-{
-	sf::Text text;
-
-	// wybranie czcionki
-	text.setFont(font);
-
-	// ustawienie stringa który ma byæ wyœwietlony
-	text.setString("LPM - podnies \n PPM - upusc");
-
-	// ustawienie wielkoœci czcionki
-	text.setCharacterSize(70); // w pikselach, nie punktach!
-	text.setPosition(1100, 300);
-	// ustawienie stylu tekstu
-	text.setStyle(sf::Text::Bold | sf::Text::Italic);
-
-	// wewn¹trz g³ównej pêtli, pomiêdzy window.clear(), a window.display()
-	window.draw(text);
-}
-
 void rysowanie()
 {
-	window.clear(sf::Color::Black);		// czyszczenie okna na czarny kolor (nie trzeba podawaæ argumentu, standardowo czyœci siê na czarny)
+	window.clear(sf::Color::Black);		// czyszczenie okna na czarny kolor (nie trzeba podawaÄ‡ argumentu, standardowo czyÅ›ci siÄ™ na czarny)
 	for (int i = 0; i < 8; i++)
 	{
 		for (int j = 0; j < 8; j++)
@@ -527,7 +639,8 @@ void rysowanie()
 		(*itr).draw(window, sf::RenderStates::Default);
 		(*itr).wczytajSprite();
 	}
-	tekst();
+	tekst("Komputer ruszyl sie: \n" + komp_pozycja + "\nTWOJ RUCH !!");
+	//tekst("LPM - podnies \n PPM - upusc", 1100, 300);
 	window.display();					// koniec tej klatki
 }
 
@@ -570,13 +683,13 @@ void tworzenieFigur()
 		mapa[0 + i * 7][0].kolor = czarny;
 		mapa[0 + i * 7][0].rodzaj_figury = wieza;
 
-		/*Figura bialy_skoczek(skoczek, bialy, pola[1 + i * 5][7].getPosition());
+		Figura bialy_skoczek(skoczek, bialy, pola[1 + i * 5][7].getPosition());
 		bialy_skoczek.x = 1 + i * 5;
 		bialy_skoczek.y = 7;
 		figury.push_back(bialy_skoczek);
 		mapa[1 + i * 5][7].zajete = true;
 		mapa[1 + i * 5][7].kolor = bialy;
-		mapa[1 + i * 5][7].rodzaj_figury = skoczek;*/
+		mapa[1 + i * 5][7].rodzaj_figury = skoczek;
 
 		Figura czarny_skoczek(skoczek, czarny, pola[1 + i * 5][0].getPosition());
 		czarny_skoczek.x = 1 + i * 5;
@@ -586,13 +699,13 @@ void tworzenieFigur()
 		mapa[1 + i * 5][0].kolor = czarny;
 		mapa[1 + i * 5][0].rodzaj_figury = skoczek;
 
-		/*Figura bialy_goniec(goniec, bialy, pola[2 + i * 3][7].getPosition());
+		Figura bialy_goniec(goniec, bialy, pola[2 + i * 3][7].getPosition());
 		bialy_goniec.x = 2 + i * 3;
 		bialy_goniec.y = 7;
 		figury.push_back(bialy_goniec);
 		mapa[2 + i * 3][7].zajete = true;
 		mapa[2 + i * 3][7].kolor = bialy;
-		mapa[2 + i * 3][7].rodzaj_figury = goniec;*/
+		mapa[2 + i * 3][7].rodzaj_figury = goniec;
 
 		Figura czarny_goniec(goniec, czarny, pola[2 + i * 3][0].getPosition());
 		czarny_goniec.x = 2 + i * 3;
@@ -683,18 +796,71 @@ void tworzeniePlanszy()
 	}
 }
 
+void przegrales()
+{
+	window.clear(sf::Color::Black);
+	sprite.setTexture(textura_przegrana);
+	window.draw(sprite);
+	window.display();
+}
+
+void wstep()
+{
+	window.clear(sf::Color::Black);
+	sprite.setTexture(textura_poczatek);
+	window.draw(sprite);
+	window.display();
+	Sleep(4000);
+}
+
+void zasady()
+{
+	window.clear(sf::Color::Black);
+	sprite.setTexture(textura_zasady);
+	window.draw(sprite);
+	window.display();
+}
+
 int main()
 {
+	font.loadFromFile("cs.ttf");
+	textura_przegrana.loadFromFile("przegrales.png");
+	textura_poczatek.loadFromFile("wejscie.jpg");
+	textura_zasady.loadFromFile("forsbite.jpg");
+	wstep();
+	Sleep(2000);
 	tworzeniePlanszy();
-	font.loadFromFile("czcionka.ttf");
 	ustawieniaOkna();
 	siatkaStworz();
 	tworzenieFigur();
-	while (window.isOpen())						// program bêdzie w³¹czony dopóki okno jest otwarte
+
+	bool k = false;
+
+	ConnectToEngine("stockfish_8_x32.exe");
+
+	while (window.isOpen())						// program bÄ™dzie wÅ‚Ä…czony dopÃ³ki okno jest otwarte
 	{
 		obslugaKlawiaturyIMyszy();
-		rysowanie();
+		while (start)
+		{
+			obslugaKlawiaturyIMyszy();
+			zasady();
+		}
+		if (koniec == true)
+		{
+			if (!k)
+			{
+				rysowanie();
+				Sleep(2000);
+			}
+			k = true;
+			przegrales();
+		}
+		else
+		{
+			rysowanie();
+		}
 	}
-
+	CloseConnection();
 	return 0;
 }
